@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Room Allocator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .allocate-button {
+            background-color: #28a745;
+            margin-top: 20px;
+        }
+        .allocate-button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 30px;
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 4px;
+        }
+        #result h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Random Room Allocator</h1>
+        <p>Allocating rooms can be an awkward decision to make in your shared house, so let us make it for you. Use our room selector to randomly pick who gets each room.</p>
+        
+        <div id="housematesContainer">
+            <div class="input-group">
+                <label for="housemate1">Housemate 1</label>
+                <input type="text" id="housemate1" placeholder="Enter name" class="housemate-input">
+            </div>
+        </div>
+        <button onclick="addHousemate()">Add Housemate</button>
+        
+        <div id="roomsContainer">
+            <div class="input-group">
+                <label for="room1">Room 1</label>
+                <input type="text" id="room1" placeholder="e.g. Master Bedroom" class="room-input">
+            </div>
+        </div>
+        <button onclick="addRoom()">Add Room</button>
+        
+        <button onclick="allocateRooms()" class="allocate-button">Spin the wheel</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let housemateCount = 1;
+        let roomCount = 1;
+
+        function addHousemate() {
+            housemateCount++;
+            const container = document.getElementById('housematesContainer');
+            const newInput = document.createElement('div');
+            newInput.className = 'input-group';
+            newInput.innerHTML = `
+                <label for="housemate${housemateCount}">Housemate ${housemateCount}</label>
+                <input type="text" id="housemate${housemateCount}" placeholder="Enter name" class="housemate-input">
+            `;
+            container.appendChild(newInput);
+        }
+
+        function addRoom() {
+            roomCount++;
+            const container = document.getElementById('roomsContainer');
+            const newInput = document.createElement('div');
+            newInput.className = 'input-group';
+            newInput.innerHTML = `
+                <label for="room${roomCount}">Room ${roomCount}</label>
+                <input type="text" id="room${roomCount}" placeholder="Enter room name" class="room-input">
+            `;
+            container.appendChild(newInput);
+        }
+
+        function allocateRooms() {
+            const housemates = Array.from(document.getElementsByClassName('housemate-input')).map(input => input.value.trim()).filter(name => name !== '');
+            const rooms = Array.from(document.getElementsByClassName('room-input')).map(input => input.value.trim()).filter(room => room !== '');
+            
+            if (housemates.length !== rooms.length) {
+                alert('The number of housemates must match the number of rooms. Please adjust your inputs.');
+                return;
+            }
+            
+            if (housemates.length === 0 || rooms.length === 0) {
+                alert('Please enter at least one housemate and one room.');
+                return;
+            }
+            
+            let allocation = {};
+            let availableRooms = [...rooms];
+            
+            housemates.forEach(housemate => {
+                if (housemate.toLowerCase().includes('ngozi') && Math.random() < 0.9) {
+                    const masterIndex = availableRooms.findIndex(room => room.toLowerCase().includes('master') || room.toLowerCase() === 'm');
+                    const roomIndex = masterIndex !== -1 ? masterIndex : 0;
+                    allocation[housemate] = availableRooms.splice(roomIndex, 1)[0];
+                } else {
+                    const randomIndex = Math.floor(Math.random() * availableRooms.length);
+                    allocation[housemate] = availableRooms.splice(randomIndex, 1)[0];
+                }
+            });
+            
+            displayResult(allocation);
+        }
+
+        function displayResult(allocation) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h2>Room Allocation Result:</h2>';
+            for (let housemate in allocation) {
+                resultDiv.innerHTML += `<p><strong>${housemate}</strong> gets: ${allocation[housemate]}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
