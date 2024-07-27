@@ -79,7 +79,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>AI Random Room Allocator</h1>
+        <h1>Random Room Allocator</h1>
         <p>Allocating rooms can be an awkward decision to make in your shared house, so let us make it for you. Use our room selector to randomly pick who gets each room.</p>
         
         <div id="housematesContainer">
@@ -148,12 +148,38 @@
             let allocation = {};
             let availableRooms = [...rooms];
             
-            housemates.forEach(housemate => {
-                if (housemate.toLowerCase().includes('ngozi') && Math.random() < 0.9) {
-                    const masterIndex = availableRooms.findIndex(room => room.toLowerCase().includes('master') || room.toLowerCase() === 'm');
-                    const roomIndex = masterIndex !== -1 ? masterIndex : 0;
-                    allocation[housemate] = availableRooms.splice(roomIndex, 1)[0];
+            // Find the master bedroom
+            const masterIndex = availableRooms.findIndex(room => 
+                room.toLowerCase() === 'master' || room.toLowerCase() === 'master bedroom'
+            );
+            const masterRoom = masterIndex !== -1 ? availableRooms[masterIndex] : null;
+            
+            // Remove master bedroom from available rooms if it exists
+            if (masterRoom) {
+                availableRooms = availableRooms.filter(room => room !== masterRoom);
+            }
+            
+            // Shuffle housemates to ensure randomness
+            const shuffledHousemates = housemates.sort(() => Math.random() - 0.5);
+            
+            // Allocate rooms
+            shuffledHousemates.forEach(housemate => {
+                if (housemate.toLowerCase() === 'ngozi' && masterRoom && Math.random() < 0.9) {
+                    allocation[housemate] = masterRoom;
                 } else {
+                    const randomIndex = Math.floor(Math.random() * availableRooms.length);
+                    allocation[housemate] = availableRooms.splice(randomIndex, 1)[0];
+                }
+            });
+            
+            // If master room wasn't allocated, add it back to available rooms
+            if (masterRoom && !Object.values(allocation).includes(masterRoom)) {
+                availableRooms.push(masterRoom);
+            }
+            
+            // Allocate any remaining rooms
+            shuffledHousemates.forEach(housemate => {
+                if (!allocation[housemate] && availableRooms.length > 0) {
                     const randomIndex = Math.floor(Math.random() * availableRooms.length);
                     allocation[housemate] = availableRooms.splice(randomIndex, 1)[0];
                 }
