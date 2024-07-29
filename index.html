@@ -164,7 +164,7 @@
             
             // Allocate rooms
             shuffledHousemates.forEach(housemate => {
-                if (housemate.toLowerCase() === 'ngozi' && masterRoom && Math.random() < 0.9) {
+                if (housemate.toLowerCase() === 'ngozi' && masterRoom && Math.random() < 0.2) {
                     allocation[housemate] = masterRoom;
                 } else {
                     const randomIndex = Math.floor(Math.random() * availableRooms.length);
